@@ -26,6 +26,7 @@ DEFAULT_INITIAL_DATA = {
         "sound_enabled": True,
         "desktop_notifications": True,
         "voice_alerts": True,
+        "ntfy_url": "movie_tracker_alerts",
         "telegram_webhook_url": "",
         "discord_webhook_url": "",
         "custom_webhook_url": ""
