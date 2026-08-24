@@ -17,7 +17,13 @@ from services.monitor_engine import MonitorEngine
 from strategies.registry import registry
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 monitor_engine = MonitorEngine(storage_instance)
+
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    return response
 
 @app.before_request
 def start_engine_once():
