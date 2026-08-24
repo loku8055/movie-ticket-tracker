@@ -191,6 +191,13 @@ const API = {
         return { success: true, alert: alertObj };
     },
 
+    async testTwilioCall() {
+        const res = await fetch('/api/twilio/test', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Twilio test call failed');
+        return data;
+    },
+
     async sendNtfyPush(movieTitle, theatre, bookingUrl) {
         try {
             const settings = await this.getSettings();

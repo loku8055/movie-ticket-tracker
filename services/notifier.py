@@ -3,6 +3,7 @@ import requests
 import subprocess
 import threading
 from typing import Dict, Any
+from config import TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER, TWILIO_TO_NUMBER
 
 class Notifier:
     def __init__(self, storage):
@@ -40,7 +41,22 @@ class Notifier:
         if ntfy_target:
             threading.Thread(target=self._send_ntfy, args=(ntfy_target, title, message, booking_url), daemon=True).start()
 
-        # 5. Custom Webhook
+        # 5. Twilio Emergency Voice Call
+        twilio_enabled = settings.get("twilio_enabled", False)
+        account_sid = settings.get("twilio_account_sid") or TWILIO_ACCOUNT_SID
+        auth_token = settings.get("twilio_auth_token") or TWILIO_AUTH_TOKEN
+        from_num = settings.get("twilio_from_number") or TWILIO_FROM_NUMBER
+        to_num = settings.get("twilio_to_number") or TWILIO_TO_NUMBER
+
+        if (twilio_enabled or account_sid) and account_sid and auth_token and from_num and to_num:
+            call_msg = f"Alert! Tickets for {movie_title} at {theatre} are officially open for booking! Secure your seats immediately."
+            threading.Thread(
+                target=self._send_twilio_call,
+                args=(account_sid, auth_token, from_num, to_num, call_msg),
+                daemon=True
+            ).start()
+
+        # 6. Custom Webhook
         custom_url = settings.get("custom_webhook_url")
         if custom_url:
             payload = {
@@ -117,4 +133,32 @@ class Notifier:
             print(f"✅ ntfy push alert sent to {url}")
         except Exception as e:
             print(f"ntfy push alert error: {e}")
+
+    def _send_twilio_call(self, account_sid: str, auth_token: str, from_number: str, to_number: str, voice_message: str):
+        try:
+            account_sid = account_sid.strip()
+            auth_token = auth_token.strip()
+            from_number = from_number.strip()
+            to_number = to_number.strip()
+
+            if not account_sid or not auth_token or not from_number or not to_number:
+                print("Twilio call skipped: Missing SID, Token, From, or To number.")
+                return
+
+            url = f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Calls.json"
+            twiml_content = f'<Response><Say voice="alice" language="en-US">{voice_message}</Say></Response>'
+            payload = {
+                "To": to_number,
+                "From": from_number,
+                "Twiml": twiml_content
+            }
+
+            resp = requests.post(url, data=payload, auth=(account_sid, auth_token), timeout=10)
+            if resp.status_code in (200, 201):
+                print(f"📞 Twilio Emergency Voice Call placed to {to_number}!")
+            else:
+                print(f"Twilio Voice Call API error ({resp.status_code}): {resp.text}")
+        except Exception as e:
+            print(f"Twilio Voice Call error: {e}")
+
 

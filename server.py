@@ -157,6 +157,21 @@ def simulate_alert():
 
     return jsonify({"success": True, "alert": simulated_alert})
 
+@app.route("/api/twilio/test", methods=["POST"])
+def test_twilio_call():
+    settings = storage_instance.get_settings()
+    account_sid = settings.get("twilio_account_sid")
+    auth_token = settings.get("twilio_auth_token")
+    from_num = settings.get("twilio_from_number")
+    to_num = settings.get("twilio_to_number")
+
+    if not account_sid or not auth_token or not from_num or not to_num:
+        return jsonify({"error": "Twilio Account SID, Auth Token, From Number, and To Number must be configured in settings."}), 400
+
+    msg = "This is a test call from your Movie Ticket Release Tracker. Your Twilio Voice alert channel is working perfectly!"
+    monitor_engine.notifier._send_twilio_call(account_sid, auth_token, from_num, to_num, msg)
+    return jsonify({"success": True, "message": f"Test call dispatched to {to_num}"})
+
 # --- Real-time SSE Stream ---
 @app.route("/api/stream")
 def sse_stream():

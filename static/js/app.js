@@ -373,6 +373,13 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('set_sound_enabled').checked = settings.sound_enabled !== false;
             document.getElementById('set_desktop_notifications').checked = settings.desktop_notifications !== false;
             document.getElementById('set_voice_alerts').checked = settings.voice_alerts !== false;
+            if (document.getElementById('set_twilio_enabled')) {
+                document.getElementById('set_twilio_enabled').checked = settings.twilio_enabled === true;
+                document.getElementById('set_twilio_account_sid').value = settings.twilio_account_sid || '';
+                document.getElementById('set_twilio_auth_token').value = settings.twilio_auth_token || '';
+                document.getElementById('set_twilio_from_number').value = settings.twilio_from_number || '';
+                document.getElementById('set_twilio_to_number').value = settings.twilio_to_number || '';
+            }
             if (document.getElementById('set_ntfy_url')) {
                 document.getElementById('set_ntfy_url').value = settings.ntfy_url || settings.ntfy_topic || '';
             }
@@ -430,6 +437,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 sound_enabled: document.getElementById('set_sound_enabled').checked,
                 desktop_notifications: document.getElementById('set_desktop_notifications').checked,
                 voice_alerts: document.getElementById('set_voice_alerts').checked,
+                twilio_enabled: document.getElementById('set_twilio_enabled') ? document.getElementById('set_twilio_enabled').checked : false,
+                twilio_account_sid: document.getElementById('set_twilio_account_sid') ? document.getElementById('set_twilio_account_sid').value.trim() : '',
+                twilio_auth_token: document.getElementById('set_twilio_auth_token') ? document.getElementById('set_twilio_auth_token').value.trim() : '',
+                twilio_from_number: document.getElementById('set_twilio_from_number') ? document.getElementById('set_twilio_from_number').value.trim() : '',
+                twilio_to_number: document.getElementById('set_twilio_to_number') ? document.getElementById('set_twilio_to_number').value.trim() : '',
                 ntfy_url: document.getElementById('set_ntfy_url') ? document.getElementById('set_ntfy_url').value.trim() : '',
                 telegram_webhook_url: document.getElementById('set_telegram_webhook_url').value.trim(),
                 discord_webhook_url: document.getElementById('set_discord_webhook_url').value.trim(),
@@ -450,6 +462,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnTestVoice) {
         btnTestVoice.addEventListener('click', () => {
             window.audioAlert.speak("Testing Movie Ticket Release Tracker voice alert system.");
+        });
+    }
+
+    const btnTestTwilio = document.getElementById('btn-test-twilio');
+    if (btnTestTwilio) {
+        btnTestTwilio.addEventListener('click', async () => {
+            try {
+                const res = await API.testTwilioCall();
+                alert("📞 " + res.message);
+            } catch (err) {
+                alert("Twilio call test failed: " + err.message);
+            }
         });
     }
 
