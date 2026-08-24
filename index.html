@@ -28,7 +28,7 @@
             <div class="header-actions">
                 <div class="live-indicator">
                     <span class="pulse-dot"></span>
-                    <span>Monitoring Engine Active</span>
+                    <span id="header-poll-timer">Next Check: 15s</span>
                 </div>
                 <button class="btn btn-primary" id="btn-add-target">
                     ⚡ Add Cinema Target
@@ -68,6 +68,28 @@
                     <div class="stat-value" id="stat-alert-count">0</div>
                     <div class="stat-label">Alerts Fired</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Search, Filter & Quick Add Toolbar -->
+        <div class="glass-panel toolbar-panel">
+            <div class="toolbar-search">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" class="form-control search-control" placeholder="Search by movie title or cinema theatre...">
+            </div>
+
+            <div class="toolbar-filters">
+                <button class="filter-pill active" data-filter="ALL">All (<span id="filter-count-all">1</span>)</button>
+                <button class="filter-pill" data-filter="AVAILABLE">Available (<span id="filter-count-avail">0</span>)</button>
+                <button class="filter-pill" data-filter="PENDING">Pending (<span id="filter-count-pending">1</span>)</button>
+                <button class="filter-pill" data-filter="PAUSED">Paused (<span id="filter-count-paused">0</span>)</button>
+            </div>
+
+            <div class="toolbar-presets">
+                <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Quick Presets:</span>
+                <button class="btn btn-secondary btn-xs" id="preset-toxic">+ Toxic (Victory)</button>
+                <button class="btn btn-secondary btn-xs" id="preset-kantara">+ Kantara Ch 1</button>
+                <button class="btn btn-secondary btn-xs" id="preset-coolie">+ Coolie (IMAX)</button>
             </div>
         </div>
 
@@ -130,12 +152,22 @@
                 </div>
 
                 <div class="glass-panel" style="padding: 22px; margin-bottom: 28px;">
-                    <p style="font-size: 0.86rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
-                        Test audio alerts, voice synthesis, and trigger simulated release notifications without waiting for actual ticket drops.
+                    <p style="font-size: 0.86rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5;">
+                        Test audio alerts, voice synthesis, sound profiles, and trigger simulated release notifications.
                     </p>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
+
+                    <div style="margin-bottom: 14px;">
+                        <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">Alert Audio Profile:</label>
+                        <select id="select-audio-profile" class="form-control" style="font-size: 0.84rem; padding: 8px 12px;">
+                            <option value="chime">🎵 Victory Chime (Fanfare Bell)</option>
+                            <option value="siren">🚨 Arcade Siren (High Alert)</option>
+                            <option value="synthwave">🎹 Cyber Synthwave (Pulse Drop)</option>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
                         <button id="btn-test-sound" class="btn btn-secondary btn-sm" style="width: 100%;">
-                            🔊 Test Alert Chime Sound
+                            🔊 Play Selected Audio Profile
                         </button>
                         <button id="btn-test-voice" class="btn btn-secondary btn-sm" style="width: 100%;">
                             🗣️ Test Voice Synthesis Alert

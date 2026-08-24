@@ -4,6 +4,7 @@
 class AudioAlertService {
     constructor() {
         this.audioCtx = null;
+        this.selectedTone = 'chime';
     }
 
     init() {
@@ -47,8 +48,61 @@ class AudioAlertService {
             osc2.start(now + 0.18);
             osc2.stop(now + 0.8);
         } catch (e) {
-            console.warn("Web Audio API not allowed without user interaction:", e);
+            console.warn("Web Audio API warning:", e);
         }
+    }
+
+    playSiren() {
+        try {
+            this.init();
+            if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+            const now = this.audioCtx.currentTime;
+
+            for (let i = 0; i < 3; i++) {
+                const startTime = now + (i * 0.18);
+                const osc = this.audioCtx.createOscillator();
+                const gain = this.audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(950, startTime);
+                osc.frequency.exponentialRampToValueAtTime(450, startTime + 0.12);
+                gain.gain.setValueAtTime(0.2, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.15);
+                osc.connect(gain);
+                gain.connect(this.audioCtx.destination);
+                osc.start(startTime);
+                osc.stop(startTime + 0.15);
+            }
+        } catch (e) {
+            console.warn("Web Audio API warning:", e);
+        }
+    }
+
+    playSynthwave() {
+        try {
+            this.init();
+            if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+            const now = this.audioCtx.currentTime;
+
+            const osc = this.audioCtx.createOscillator();
+            const gain = this.audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.4);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+            osc.connect(gain);
+            gain.connect(this.audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.7);
+        } catch (e) {
+            console.warn("Web Audio API warning:", e);
+        }
+    }
+
+    playSelectedTone() {
+        if (this.selectedTone === 'siren') this.playSiren();
+        else if (this.selectedTone === 'synthwave') this.playSynthwave();
+        else this.playChime();
     }
 
     speak(text) {
@@ -62,7 +116,7 @@ class AudioAlertService {
     }
 
     triggerAlert(movieTitle, theatre) {
-        this.playChime();
+        this.playSelectedTone();
         const alertText = `Attention! Tickets for ${movieTitle} at ${theatre} are now available! Book your seats now!`;
         this.speak(alertText);
     }

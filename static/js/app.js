@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     let targetsState = [];
     let settingsState = {};
+    let activeFilter = 'ALL';
+    let searchQuery = '';
 
     // DOM Elements
     const targetsGrid = document.getElementById('targets-grid');
@@ -13,6 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const strategySelect = document.getElementById('strategy_id');
     const genericFields = document.getElementById('generic-fields');
     
+    // Toolbar Elements
+    const searchInput = document.getElementById('search-input');
+    const filterPills = document.querySelectorAll('.filter-pill');
+    const presetToxic = document.getElementById('preset-toxic');
+    const presetKantara = document.getElementById('preset-kantara');
+    const presetCoolie = document.getElementById('preset-coolie');
+    const headerPollTimer = document.getElementById('header-poll-timer');
+    const selectAudioProfile = document.getElementById('select-audio-profile');
+
     // Simulation Buttons
     const btnTestSound = document.getElementById('btn-test-sound');
     const btnTestVoice = document.getElementById('btn-test-voice');
@@ -30,12 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const alerts = await API.getAlerts();
             const strategies = await API.getStrategies();
 
-            renderTargets(targetsState);
+            applyFiltersAndRender();
             renderLogs(logs);
             renderAlerts(alerts);
             populateStrategies(strategies);
             populateSettings(settingsState);
             updateStatsCounters(alerts.length);
+            startCountdownTimer();
 
             // Connect SSE event stream
             API.connectStream(handleSSEEvent);
@@ -45,12 +57,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Live Countdown Timer
+    let countdown = 15;
+    function startCountdownTimer() {
+        setInterval(() => {
+            countdown--;
+            if (countdown <= 0) countdown = 15;
+            if (headerPollTimer) {
+                headerPollTimer.textContent = `Next Check: ${countdown}s`;
+            }
+        }, 1000);
+    }
+
     let alertCount = 0;
     function updateStatsCounters(totalAlerts) {
         if (typeof totalAlerts === 'number') alertCount = totalAlerts;
         const targetCountEl = document.getElementById('stat-target-count');
         const alertCountEl = document.getElementById('stat-alert-count');
         const latencyAvgEl = document.getElementById('stat-latency-avg');
+
+        const availCount = targetsState.filter(t => t.last_status === 'AVAILABLE').length;
+        const pendingCount = targetsState.filter(t => t.enabled && t.last_status !== 'AVAILABLE').length;
+        const pausedCount = targetsState.filter(t => !t.enabled).length;
+
+        if (document.getElementById('filter-count-all')) document.getElementById('filter-count-all').textContent = targetsState.length;
+        if (document.getElementById('filter-count-avail')) document.getElementById('filter-count-avail').textContent = availCount;
+        if (document.getElementById('filter-count-pending')) document.getElementById('filter-count-pending').textContent = pendingCount;
+        if (document.getElementById('filter-count-paused')) document.getElementById('filter-count-paused').textContent = pausedCount;
 
         if (targetCountEl) targetCountEl.textContent = targetsState.length;
         if (alertCountEl) alertCountEl.textContent = alertCount;
@@ -74,6 +107,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function applyFiltersAndRender() {
+        let filtered = targetsState;
+
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            filtered = filtered.filter(t => 
+                (t.movie_title && t.movie_title.toLowerCase().includes(q)) ||
+                (t.theatre && t.theatre.toLowerCase().includes(q))
+            );
+        }
+
+        if (activeFilter === 'AVAILABLE') {
+            filtered = filtered.filter(t => t.last_status === 'AVAILABLE');
+        } else if (activeFilter === 'PENDING') {
+            filtered = filtered.filter(t => t.enabled && t.last_status !== 'AVAILABLE');
+        } else if (activeFilter === 'PAUSED') {
+            filtered = filtered.filter(t => !t.enabled);
+        }
+
+        renderTargets(filtered);
+        updateStatsCounters();
+    }
+
     function updateTargetInState(updatedTarget) {
         const idx = targetsState.findIndex(t => t.id === updatedTarget.id);
         if (idx !== -1) {
@@ -81,8 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             targetsState.push(updatedTarget);
         }
-        renderTargets(targetsState);
-        updateStatsCounters();
+        applyFiltersAndRender();
     }
 
     function handleAlertTriggered(alertData) {
@@ -98,11 +153,61 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window.handleAlertTriggered = handleAlertTriggered;
 
+    // Search and Filter Listeners
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value.trim();
+            applyFiltersAndRender();
+        });
+    }
+
+    filterPills.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterPills.forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            activeFilter = btn.getAttribute('data-filter');
+            applyFiltersAndRender();
+        });
+    });
+
+    // Preset Buttons
+    const addPreset = async (title, theatre, url, strategy = 'victory_cinema') => {
+        try {
+            const newTarget = await API.addTarget({
+                movie_title: title,
+                theatre: theatre,
+                target_url: url,
+                strategy_id: strategy,
+                interval_sec: 15
+            });
+            updateTargetInState(newTarget);
+        } catch (e) {
+            console.error("Preset add failed:", e);
+        }
+    };
+
+    if (presetToxic) {
+        presetToxic.addEventListener('click', () => addPreset('Toxic: A Fairy Tale for Grown Ups (Kannada)', 'Victory Cinema', 'https://victorycinema.in/showing/'));
+    }
+    if (presetKantara) {
+        presetKantara.addEventListener('click', () => addPreset('Kantara: Chapter 1 (Kannada)', 'PVR INOX Forum Mall', 'https://bookmyshow.com'));
+    }
+    if (presetCoolie) {
+        presetCoolie.addEventListener('click', () => addPreset('Coolie (Tamil / IMAX 2D)', 'Swagath Shankar Nag IMAX', 'https://bookmyshow.com'));
+    }
+
+    if (selectAudioProfile) {
+        selectAudioProfile.addEventListener('change', (e) => {
+            window.audioAlert.selectedTone = e.target.value;
+            window.audioAlert.playSelectedTone();
+        });
+    }
+
     // Render Targets Grid
     function renderTargets(targets) {
         targetsGrid.innerHTML = '';
         if (targets.length === 0) {
-            targetsGrid.innerHTML = `<div class="glass-panel" style="padding: 30px; text-align: center; color: var(--text-muted);">No cinema targets monitored. Click "+ Add Cinema Target" to create one.</div>`;
+            targetsGrid.innerHTML = `<div class="glass-panel" style="padding: 30px; text-align: center; color: var(--text-muted);">No cinema targets match the search/filter criteria. Click "+ Add Cinema Target" or use Quick Presets.</div>`;
             return;
         }
 
@@ -334,7 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Simulation Triggers
     if (btnTestSound) {
         btnTestSound.addEventListener('click', () => {
-            window.audioAlert.playChime();
+            window.audioAlert.playSelectedTone();
         });
     }
 
