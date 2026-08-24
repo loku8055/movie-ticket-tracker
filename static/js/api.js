@@ -185,7 +185,38 @@ const API = {
             window.handleAlertTriggered(alertObj);
         }
 
+        // Send client-side ntfy push if configured
+        this.sendNtfyPush(movieTitle, theatre, bookingUrl);
+
         return { success: true, alert: alertObj };
+    },
+
+    async sendNtfyPush(movieTitle, theatre, bookingUrl) {
+        try {
+            const settings = await this.getSettings();
+            let ntfyTarget = settings.ntfy_url || settings.ntfy_topic;
+            if (!ntfyTarget) return;
+
+            ntfyTarget = ntfyTarget.trim();
+            const url = ntfyTarget.startsWith('http://') || ntfyTarget.startsWith('https://')
+                ? ntfyTarget
+                : `https://ntfy.sh/${ntfyTarget.replace(/^\//, '')}`;
+
+            await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Title': `🎟️ TICKET RELEASE ALERT: ${movieTitle}`,
+                    'Priority': 'high',
+                    'Tags': 'tickets,clapper,tada',
+                    'Click': bookingUrl,
+                    'Actions': `view, Book Tickets Now, ${bookingUrl}, clear=true`
+                },
+                body: `Tickets available at ${theatre}! Book your seats now: ${bookingUrl}`
+            });
+            console.log(`[ntfy] Push notification sent to ${url}`);
+        } catch (e) {
+            console.warn(`[ntfy] Client-side push notification failed:`, e);
+        }
     },
 
     connectStream(onEvent) {

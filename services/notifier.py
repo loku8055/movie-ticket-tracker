@@ -35,7 +35,12 @@ class Notifier:
         if discord_url:
             threading.Thread(target=self._send_discord, args=(discord_url, title, message, booking_url), daemon=True).start()
 
-        # 4. Custom Webhook
+        # 4. ntfy Push Notification (ntfy.sh or self-hosted)
+        ntfy_target = settings.get("ntfy_url") or settings.get("ntfy_topic")
+        if ntfy_target:
+            threading.Thread(target=self._send_ntfy, args=(ntfy_target, title, message, booking_url), daemon=True).start()
+
+        # 5. Custom Webhook
         custom_url = settings.get("custom_webhook_url")
         if custom_url:
             payload = {
@@ -89,3 +94,27 @@ class Notifier:
             requests.post(webhook_url, json=payload, timeout=5)
         except Exception as e:
             print(f"Custom webhook error: {e}")
+
+    def _send_ntfy(self, target: str, title: str, message: str, booking_url: str):
+        try:
+            target = target.strip()
+            if not target.startswith("http://") and not target.startswith("https://"):
+                url = f"https://ntfy.sh/{target.lstrip('/')}"
+            else:
+                url = target
+
+            headers = {
+                "Title": title.encode("utf-8").decode("latin-1", "ignore"),
+                "Priority": "high",
+                "Tags": "tickets,clapper,tada",
+                "Click": booking_url
+            }
+
+            if booking_url:
+                headers["Actions"] = f"view, Book Tickets Now, {booking_url}, clear=true"
+
+            requests.post(url, data=message.encode("utf-8"), headers=headers, timeout=5)
+            print(f"✅ ntfy push alert sent to {url}")
+        except Exception as e:
+            print(f"ntfy push alert error: {e}")
+

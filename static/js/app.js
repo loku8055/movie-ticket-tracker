@@ -373,6 +373,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('set_sound_enabled').checked = settings.sound_enabled !== false;
             document.getElementById('set_desktop_notifications').checked = settings.desktop_notifications !== false;
             document.getElementById('set_voice_alerts').checked = settings.voice_alerts !== false;
+            if (document.getElementById('set_ntfy_url')) {
+                document.getElementById('set_ntfy_url').value = settings.ntfy_url || settings.ntfy_topic || '';
+            }
             document.getElementById('set_telegram_webhook_url').value = settings.telegram_webhook_url || '';
             document.getElementById('set_discord_webhook_url').value = settings.discord_webhook_url || '';
             document.getElementById('set_custom_webhook_url').value = settings.custom_webhook_url || '';
@@ -427,6 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 sound_enabled: document.getElementById('set_sound_enabled').checked,
                 desktop_notifications: document.getElementById('set_desktop_notifications').checked,
                 voice_alerts: document.getElementById('set_voice_alerts').checked,
+                ntfy_url: document.getElementById('set_ntfy_url') ? document.getElementById('set_ntfy_url').value.trim() : '',
                 telegram_webhook_url: document.getElementById('set_telegram_webhook_url').value.trim(),
                 discord_webhook_url: document.getElementById('set_discord_webhook_url').value.trim(),
                 custom_webhook_url: document.getElementById('set_custom_webhook_url').value.trim()
