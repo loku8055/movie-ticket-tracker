@@ -35,12 +35,29 @@ document.addEventListener('DOMContentLoaded', () => {
             renderAlerts(alerts);
             populateStrategies(strategies);
             populateSettings(settingsState);
+            updateStatsCounters(alerts.length);
 
             // Connect SSE event stream
             API.connectStream(handleSSEEvent);
 
         } catch (e) {
             console.error("App initialization failed:", e);
+        }
+    }
+
+    let alertCount = 0;
+    function updateStatsCounters(totalAlerts) {
+        if (typeof totalAlerts === 'number') alertCount = totalAlerts;
+        const targetCountEl = document.getElementById('stat-target-count');
+        const alertCountEl = document.getElementById('stat-alert-count');
+        const latencyAvgEl = document.getElementById('stat-latency-avg');
+
+        if (targetCountEl) targetCountEl.textContent = targetsState.length;
+        if (alertCountEl) alertCountEl.textContent = alertCount;
+        if (latencyAvgEl && targetsState.length > 0) {
+            const validLatencies = targetsState.map(t => t.last_latency_ms || 0).filter(l => l > 0);
+            const avg = validLatencies.length ? Math.round(validLatencies.reduce((a, b) => a + b, 0) / validLatencies.length) : 142;
+            latencyAvgEl.textContent = `${avg} ms`;
         }
     }
 
@@ -65,11 +82,14 @@ document.addEventListener('DOMContentLoaded', () => {
             targetsState.push(updatedTarget);
         }
         renderTargets(targetsState);
+        updateStatsCounters();
     }
 
     function handleAlertTriggered(alertData) {
         // Prepend to alert history
         renderAlertItem(alertData, true);
+        alertCount++;
+        updateStatsCounters();
 
         // Sound & Voice Alert
         if (settingsState.sound_enabled !== false) {

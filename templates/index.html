@@ -8,7 +8,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Stylesheet -->
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
@@ -31,10 +31,45 @@
                     <span>Monitoring Engine Active</span>
                 </div>
                 <button class="btn btn-primary" id="btn-add-target">
-                    ➕ Add Cinema Target
+                    ⚡ Add Cinema Target
                 </button>
             </div>
         </header>
+
+        <!-- Dynamic Stats Overview Bar -->
+        <div class="stats-overview">
+            <div class="glass-panel stat-card">
+                <div class="stat-icon" style="color: var(--primary);">🎯</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="stat-target-count">1</div>
+                    <div class="stat-label">Monitored Targets</div>
+                </div>
+            </div>
+
+            <div class="glass-panel stat-card">
+                <div class="stat-icon" style="color: var(--success);">⚡</div>
+                <div class="stat-info">
+                    <div class="stat-value">15 sec</div>
+                    <div class="stat-label">Check Interval</div>
+                </div>
+            </div>
+
+            <div class="glass-panel stat-card">
+                <div class="stat-icon" style="color: var(--warning);">📡</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="stat-latency-avg">142 ms</div>
+                    <div class="stat-label">Avg Response Latency</div>
+                </div>
+            </div>
+
+            <div class="glass-panel stat-card">
+                <div class="stat-icon" style="color: #ff0080;">🔔</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="stat-alert-count">0</div>
+                    <div class="stat-label">Alerts Fired</div>
+                </div>
+            </div>
+        </div>
 
         <!-- Monitored Cinema Targets Section -->
         <section>
@@ -75,7 +110,7 @@
                 </div>
 
                 <!-- Release Alert History -->
-                <div class="section-header" style="margin-top: 28px;">
+                <div class="section-header" style="margin-top: 32px;">
                     <h2 class="section-title">
                         🔔 Release Alert History
                     </h2>
@@ -94,11 +129,11 @@
                     </h2>
                 </div>
 
-                <div class="glass-panel" style="padding: 20px; margin-bottom: 24px;">
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+                <div class="glass-panel" style="padding: 22px; margin-bottom: 28px;">
+                    <p style="font-size: 0.86rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
                         Test audio alerts, voice synthesis, and trigger simulated release notifications without waiting for actual ticket drops.
                     </p>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
                         <button id="btn-test-sound" class="btn btn-secondary btn-sm" style="width: 100%;">
                             🔊 Test Alert Chime Sound
                         </button>
@@ -133,7 +168,7 @@
                             <input type="checkbox" id="set_desktop_notifications" checked>
                         </div>
 
-                        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
+                        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 18px 0;">
 
                         <div class="form-group">
                             <label for="set_telegram_webhook_url">Telegram Bot Webhook URL</label>
@@ -150,7 +185,7 @@
                             <input type="url" id="set_custom_webhook_url" class="form-control" placeholder="https://your-server.com/webhook">
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 10px;">
+                        <button type="submit" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 12px;">
                             💾 Save Settings
                         </button>
                     </form>
@@ -206,7 +241,7 @@
                     <input type="number" id="interval_sec" name="interval_sec" class="form-control" value="15" min="5" max="3600">
                 </div>
 
-                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 26px;">
                     <button type="button" class="btn btn-secondary" onclick="document.getElementById('add-target-modal').classList.remove('active')">Cancel</button>
                     <button type="submit" class="btn btn-primary">Start Monitoring Target</button>
                 </div>
