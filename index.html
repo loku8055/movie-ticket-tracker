@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Ticket Release Tracker | Real-time Cinema Monitoring</title>
+    <meta name="description" content="Production-ready real-time movie ticket release tracker for Victory Cinema and multi-theatre web platforms.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="./static/css/styles.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="glass-panel app-header">
+            <div class="brand-section">
+                <div class="brand-logo">🎟️</div>
+                <div class="brand-title">
+                    <h1>Movie Ticket Release Tracker</h1>
+                    <p>Real-Time Cinema Availability Engine</p>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="live-indicator">
+                    <span class="pulse-dot"></span>
+                    <span>Monitoring Engine Active</span>
+                </div>
+                <button class="btn btn-primary" id="btn-add-target">
+                    ➕ Add Cinema Target
+                </button>
+            </div>
+        </header>
+
+        <!-- Monitored Cinema Targets Section -->
+        <section>
+            <div class="section-header">
+                <h2 class="section-title">
+                    🎯 Monitored Cinema Targets
+                </h2>
+            </div>
+
+            <div id="targets-grid" class="targets-grid">
+                <!-- Targets rendered dynamically via JS -->
+            </div>
+        </section>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Left Column: Live Telemetry Logs & Alert History -->
+            <div>
+                <!-- Real-time Console Log -->
+                <div class="section-header">
+                    <h2 class="section-title">
+                        📡 Live Check Stream & Telemetry
+                    </h2>
+                </div>
+                
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <span class="terminal-title">live_monitor_stream.log — SSE 15s interval</span>
+                    </div>
+                    <div id="terminal-logs" class="terminal-body">
+                        <!-- Live log lines streaming here -->
+                    </div>
+                </div>
+
+                <!-- Release Alert History -->
+                <div class="section-header" style="margin-top: 28px;">
+                    <h2 class="section-title">
+                        🔔 Release Alert History
+                    </h2>
+                </div>
+                <div id="alert-history-list">
+                    <!-- Historical release alerts rendered here -->
+                </div>
+            </div>
+
+            <!-- Right Column: Simulation Panel & Settings -->
+            <div>
+                <!-- Simulation Control Center -->
+                <div class="section-header">
+                    <h2 class="section-title">
+                        🧪 Simulation & Test Center
+                    </h2>
+                </div>
+
+                <div class="glass-panel" style="padding: 20px; margin-bottom: 24px;">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+                        Test audio alerts, voice synthesis, and trigger simulated release notifications without waiting for actual ticket drops.
+                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button id="btn-test-sound" class="btn btn-secondary btn-sm" style="width: 100%;">
+                            🔊 Test Alert Chime Sound
+                        </button>
+                        <button id="btn-test-voice" class="btn btn-secondary btn-sm" style="width: 100%;">
+                            🗣️ Test Voice Synthesis Alert
+                        </button>
+                        <button id="btn-simulate-alert" class="btn btn-success btn-sm" style="width: 100%;">
+                            🚀 Simulate Toxic Ticket Release
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="section-header">
+                    <h2 class="section-title">
+                        ⚙️ Alert Channels & Settings
+                    </h2>
+                </div>
+
+                <div class="glass-panel settings-panel">
+                    <form id="form-settings">
+                        <div class="toggle-switch">
+                            <label for="set_sound_enabled">Browser Audio Chime</label>
+                            <input type="checkbox" id="set_sound_enabled" checked>
+                        </div>
+                        <div class="toggle-switch">
+                            <label for="set_voice_alerts">Speech Synthesis Alert</label>
+                            <input type="checkbox" id="set_voice_alerts" checked>
+                        </div>
+                        <div class="toggle-switch">
+                            <label for="set_desktop_notifications">Native Windows Toast Alerts</label>
+                            <input type="checkbox" id="set_desktop_notifications" checked>
+                        </div>
+
+                        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
+
+                        <div class="form-group">
+                            <label for="set_telegram_webhook_url">Telegram Bot Webhook URL</label>
+                            <input type="url" id="set_telegram_webhook_url" class="form-control" placeholder="https://api.telegram.org/bot<TOKEN>/sendMessage?chat_id=<CHAT_ID>">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="set_discord_webhook_url">Discord Channel Webhook URL</label>
+                            <input type="url" id="set_discord_webhook_url" class="form-control" placeholder="https://discord.com/api/webhooks/...">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="set_custom_webhook_url">Custom HTTP POST Webhook</label>
+                            <input type="url" id="set_custom_webhook_url" class="form-control" placeholder="https://your-server.com/webhook">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 10px;">
+                            💾 Save Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Target Wizard -->
+    <div id="add-target-modal" class="modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ Add Cinema Target</h2>
+                <button id="btn-close-modal" class="close-btn">&times;</button>
+            </div>
+
+            <form id="form-add-target">
+                <div class="form-group">
+                    <label for="movie_title">Movie Title *</label>
+                    <input type="text" id="movie_title" name="movie_title" class="form-control" placeholder="e.g. Toxic (Kannada)" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="theatre">Theatre / Cinema Name *</label>
+                    <input type="text" id="theatre" name="theatre" class="form-control" placeholder="e.g. Victory Cinema" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="target_url">Movie Page URL *</label>
+                    <input type="url" id="target_url" name="target_url" class="form-control" placeholder="https://victorycinema.in/upcoming-movie/..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="strategy_id">Scraping Strategy Driver *</label>
+                    <select id="strategy_id" name="strategy_id" class="form-control">
+                        <!-- Options populated via JS -->
+                    </select>
+                </div>
+
+                <div id="generic-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="selector">CSS Selector (Optional)</label>
+                        <input type="text" id="selector" name="selector" class="form-control" placeholder="e.g. .book-now-btn">
+                    </div>
+                    <div class="form-group">
+                        <label for="keyword">Keyword to Match</label>
+                        <input type="text" id="keyword" name="keyword" class="form-control" placeholder="e.g. Book Now" value="Book Now">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="interval_sec">Polling Interval (Seconds)</label>
+                    <input type="number" id="interval_sec" name="interval_sec" class="form-control" value="15" min="5" max="3600">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('add-target-modal').classList.remove('active')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Start Monitoring Target</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application JS -->
+    <script src="./static/js/audio_alert.js"></script>
+    <script src="./static/js/api.js"></script>
+    <script src="./static/js/app.js"></script>
+</body>
+</html>

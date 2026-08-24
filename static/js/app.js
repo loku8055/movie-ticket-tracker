@@ -76,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.audioAlert.triggerAlert(alertData.movie_title, alertData.theatre);
         }
     }
+    window.handleAlertTriggered = handleAlertTriggered;
 
     // Render Targets Grid
     function renderTargets(targets) {
